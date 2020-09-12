@@ -45,6 +45,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const deadline = '2020-10-1';
 
+    function changeDeadline(end) {
+        const date = document.querySelector('.promotion__end');
+        date.innerHTML =`Акция закончится ${end}`;
+    }
+    
      function getTimeRemaning(endtime){
         const t = Date.parse(endtime) - Date.parse(new Date),
               days = Math.floor(t / (1000 * 60 * 60 * 24)),
@@ -92,6 +97,38 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
      }
-
+     changeDeadline(deadline);
      setClock('.timer', deadline);
+
+     //add modal
+
+    const openModal = document.querySelectorAll('[data-modal]');
+    const closeModal = document.querySelector('[data-close]');
+    const modal = document.querySelector('.modal');
+
+    openModal.forEach(item => {
+        item.addEventListener('click', () => {
+            modal.classList.toggle('show');
+            document.body.style.overflow = "hidden";
+        });
+    });
+
+    function closeModalWindow() {
+        modal.classList.toggle('show');
+        document.body.style.overflow = "";
+    }
+    
+    closeModal.addEventListener('click', closeModalWindow);
+
+    modal.addEventListener('click', (event) => {
+        if(event.target === modal) {
+            closeModalWindow();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.code === "Escape" && modal.classList.contains('show')) {
+            closeModalWindow();
+        }
+    });
 });
