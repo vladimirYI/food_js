@@ -151,10 +151,10 @@ window.addEventListener('DOMContentLoaded', () => {
     // add class
 
     class Menu {
-        constructor(img, alt, subtitle, descr, price, parentSelector, ...classes) {
+        constructor(img, altimg, title, descr, price, parentSelector, ...classes) {
             this.img = img;
-            this.alt = alt;
-            this.subtitle = subtitle;
+            this.altimg = altimg;
+            this.title = title;
             this.descr = descr;
             this.price = price;
             this.classes = classes;
@@ -178,8 +178,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
 
             element.innerHTML = `
-                <img src=${this.img} alt=${this.alt}>
-                <h3 class="menu__item-subtitle">${this.subtitle}</h3>
+                <img src=${this.img} alt=${this.altimg}>
+                <h3 class="menu__item-subtitle">${this.title}</h3>
                 <div class="menu__item-descr">${this.descr}</div>
                 <div class="menu__item-divider"></div>
                 <div class="menu__item-price">
@@ -191,32 +191,22 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new Menu(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9,
-        '.menu .container'
-    ).render();
-    
-    new Menu(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню "Премиум"',
-        'В меню "Премиум" мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        12,
-        '.menu .container'
-    ).render();
-    
-    new Menu(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню "Постное" - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        11,
-        '.menu .container'
-    ).render();
+    const getResource = async (url) => {
+        const res = await fetch(url);
+
+         if(!res.ok) {
+             throw new Error(`Could not fetch ${url}, status: ${res.status}`)
+         }
+
+        return await res.json();
+    };
+
+    getResource('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({img, altimg, title, descr, price}) => {
+                new Menu(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        })
 
 
     // add forms
@@ -230,10 +220,22 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     forms.forEach(item => {
-        postData(item);
+        bindPostData(item);
     });
 
-    function postData(form) {
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+            method: "POST",
+            body: data, 
+            headers: {
+                'Content-type': 'application/json'
+            },
+        });
+
+        return await res.json();
+    };
+
+    function bindPostData(form) {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
 
@@ -248,19 +250,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData(form);
 
-            const object = {};
-            formData.forEach(function(value, key) {
-                object[key] = value;
-            });
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            fetch('server.php', {
-                method: "POST",
-                body: JSON.stringify(object),
-                headers: {
-                    'Content-type': 'application/json'
-                }
-            })
-            .then(data => data.text())
+            postData('http://localhost:3000/requests', json)
             .then(data => {
                 console.log(data); 
                 showThanksModal(message.success);
