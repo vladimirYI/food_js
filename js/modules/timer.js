@@ -1,5 +1,4 @@
-function timer() {
-    const deadline = '2020-11-1';
+function timer(id, deadline) {
 
     function changeDeadline(end) {
         const date = document.querySelector('.promotion__end');
@@ -54,7 +53,7 @@ function timer() {
         }
      }
      changeDeadline(deadline);
-     setClock('.timer', deadline);
+     setClock(id, deadline);
 }
 
-module.exports = timer;
+export default timer;

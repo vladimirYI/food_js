@@ -109,4 +109,4 @@ function calculator() {
     getDyamicInformation('#age');
 }
 
-module.exports = calculator;
+export default calculator;
